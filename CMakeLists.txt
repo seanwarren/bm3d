@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(da3d)
 
-# The build type "Release" adds some optimizations
-if (NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE "Release")
-endif ()
+# Find Matlab
+find_package(Matlab COMPONENTS MEX_COMPILER MX_LIBRARY REQUIRED)
 
 # Are we using gcc?
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -18,13 +16,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra")
 endif ()
 
-# Enable C99
-if (CMAKE_VERSION VERSION_LESS "3.1")
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-else ()
-  set (CMAKE_C_STANDARD 99)
-endif ()
-
 # Enable OpenMP
 find_package (OpenMP)
 if(OPENMP_FOUND)
@@ -32,22 +23,18 @@ if(OPENMP_FOUND)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 endif()
 
-# Link LibTIFF, LibJPEG, LibPNG, OpenMP
-find_package (TIFF REQUIRED)
-find_package (JPEG REQUIRED)
-find_package (PNG REQUIRED)
+# Find fftw3
 find_path (FFTW_INCLUDES fftw3.h)
 find_library (FFTWF_LIBRARIES NAMES fftw3f)
 
-
-include_directories (PUBLIC ${EIGEN3_INCLUDE_DIR} PUBLIC ${TIFF_INCLUDE_DIR} PUBLIC ${JPEG_INCLUDE_DIR} PUBLIC ${PNG_INCLUDE_DIRS} PUBLIC ${ALGLIB_INCLUDE_DIR} PUBLIC ${FFTW_INCLUDES})
-link_libraries (${TIFF_LIBRARIES} ${JPEG_LIBRARIES} ${PNG_LIBRARIES} ${FFTWF_LIBRARIES})
-
 set(SOURCE_FILES
-    bm3d.cpp           iio.c              lib_transforms.h   utilities.h
-    bm3d.h             lib_transforms.cpp main.cpp           utilities.cpp
+    bm3d.h     lib_transforms.h      utilities.h
+    bm3d.cpp   lib_transforms.cpp    utilities.cpp    mex.cpp
     )
 
-set_property(SOURCE iio.c PROPERTY COMPILE_FLAGS "-Wno-unused-variable -Wno-unused-parameter -Wno-pointer-sign -Wno-parentheses -Wno-deprecated-declarations -Wno-unused-function")
+if (NOT WIN32)
+   set_property(SOURCE iio.c PROPERTY COMPILE_FLAGS "-Wno-unused-variable -Wno-unused-parameter -Wno-pointer-sign -Wno-parentheses -Wno-deprecated-declarations -Wno-unused-function")
+endif ()
 
-add_executable(bm3d ${SOURCE_FILES})
+matlab_add_mex(NAME bm3d ${SOURCE_FILES} LINK_TO ${FFTWF_LIBRARIES})
+target_include_directories(bm3d PUBLIC ${FFTW_INCLUDES})

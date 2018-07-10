@@ -4,6 +4,7 @@
 #include <vector>
 #include <fftw3.h>
 
+#ifndef WIN32
 //! Read image and check number of channels
 int load_image(
     char* name
@@ -21,6 +22,7 @@ int save_image(
 ,   const unsigned height
 ,   const unsigned chnls
 );
+#endif
 
 //! Check if a number is a power of 2
 bool power_of_2(

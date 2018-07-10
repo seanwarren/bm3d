@@ -21,13 +21,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 #include <math.h>
 
 #include "utilities.h"
-extern "C"{
-#include "iio.h"
-}
 
 #define YUV       0
 #define YCBCR     1
@@ -35,6 +31,12 @@ extern "C"{
 #define RGB       3
 
  using namespace std;
+
+#ifndef WIN32
+extern "C" {
+#include "iio.h"
+ }
+
 
  /**
   * @brief Load image, check the number of channels
@@ -124,6 +126,9 @@ int save_image(
 
     return EXIT_SUCCESS;
 }
+
+#endif
+
 
 /**
  * @brief Check if a number is a power of 2
