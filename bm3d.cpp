@@ -89,7 +89,7 @@ int run_bm3d(
 ,   const unsigned tau_2D_wien
 ,   const unsigned color_space
 ,   const unsigned patch_size
-,   const unsigned nb_threads
+,   const int nb_threads
 ,   const bool verbose
 ){
     //! Parameters
@@ -130,7 +130,7 @@ int run_bm3d(
         != EXIT_SUCCESS) return EXIT_FAILURE;
 
     //! Check if OpenMP is used or if number of cores of the computer is > 1
-    unsigned _nb_threads = nb_threads;
+    int _nb_threads = nb_threads;
     if (verbose)
     {
         cout << "OpenMP multithreading is";
@@ -142,8 +142,8 @@ int run_bm3d(
 
     // set _nb_threads
 #ifdef _OPENMP
-    unsigned avail_nb_threads = omp_get_max_threads();
-    unsigned avail_nb_cores = omp_get_num_procs();
+    int avail_nb_threads = omp_get_max_threads();
+    int avail_nb_cores = omp_get_num_procs();
 
     // if specified number exceeds available threads of if not specified at all
     // at least use all available threads
@@ -175,9 +175,9 @@ int run_bm3d(
     }
 
     //! Allocate plan for FFTW library
-    fftwf_plan plan_2d_for_1[_nb_threads];
-    fftwf_plan plan_2d_for_2[_nb_threads];
-    fftwf_plan plan_2d_inv[_nb_threads];
+    vector<fftwf_plan> plan_2d_for_1(_nb_threads);
+    vector<fftwf_plan> plan_2d_for_2(_nb_threads);
+    vector<fftwf_plan> plan_2d_inv(_nb_threads);
 
     //! In the simple case
     if (_nb_threads == 1)
@@ -261,7 +261,7 @@ int run_bm3d(
 
         //! Allocating Plan for FFTW process
         if (tau_2D_hard == DCT)
-            for (unsigned n = 0; n < _nb_threads; n++)
+            for (int n = 0; n < _nb_threads; n++)
             {
                 const unsigned nb_cols = ind_size(w_table[n] - kHard + 1, nHard, pHard);
                 allocate_plan_2d(&plan_2d_for_1[n], kHard, FFTW_REDFT10,
@@ -278,7 +278,7 @@ int run_bm3d(
                                     plan_2d_for_1, plan_2d_for_2, plan_2d_inv)
         {
             #pragma omp for schedule(dynamic) nowait
-            for (unsigned n = 0; n < _nb_threads; n++)
+            for (int n = 0; n < _nb_threads; n++)
             {
                 bm3d_1st_step(sigma, sub_noisy[n], sub_basic[n], w_table[n],
                               h_table[n], chnls, nHard, kHard, NHard, pHard, useSD_h,
@@ -296,7 +296,7 @@ int run_bm3d(
 
         //! Allocating Plan for FFTW process
         if (tau_2D_wien == DCT)
-            for (unsigned n = 0; n < _nb_threads; n++)
+            for (int n = 0; n < _nb_threads; n++)
             {
                 const unsigned nb_cols = ind_size(w_table[n] - kWien + 1, nWien, pWien);
                 allocate_plan_2d(&plan_2d_for_1[n], kWien, FFTW_REDFT10,
@@ -314,7 +314,7 @@ int run_bm3d(
                                     plan_2d_inv)
         {
             #pragma omp for schedule(dynamic) nowait
-            for (unsigned n = 0; n < _nb_threads; n++)
+            for (int n = 0; n < _nb_threads; n++)
             {
                 bm3d_2nd_step(sigma, sub_noisy[n], sub_basic[n], sub_denoised[n],
                               w_table[n], h_table[n], chnls, nWien, kWien, NWien, pWien,
@@ -339,7 +339,7 @@ int run_bm3d(
 
     //! Free Memory
     if (tau_2D_hard == DCT || tau_2D_wien == DCT)
-        for (unsigned n = 0; n < _nb_threads; n++)
+        for (int n = 0; n < _nb_threads; n++)
         {
             fftwf_destroy_plan(plan_2d_for_1[n]);
             fftwf_destroy_plan(plan_2d_for_2[n]);
