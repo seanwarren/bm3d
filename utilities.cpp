@@ -409,7 +409,7 @@ int color_space_transform(
         if (rgb2yuv)
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Y
                 tmp[k + red  ] =  0.299f   * img[k + red] + 0.587f   * img[k + green] + 0.114f   * img[k + blue];
@@ -422,7 +422,7 @@ int color_space_transform(
         else
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Red   channel
                 tmp[k + red  ] = img[k + red] + 1.13983f * img[k + blue];
@@ -438,7 +438,7 @@ int color_space_transform(
         if (rgb2yuv)
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Y
                 tmp[k + red  ] =  0.299f * img[k + red] + 0.587f * img[k + green] + 0.114f * img[k + blue];
@@ -451,7 +451,7 @@ int color_space_transform(
         else
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Red   channel
                 tmp[k + red  ] = 1.000f * img[k + red] + 0.000f * img[k + green] + 1.402f * img[k + blue];
@@ -467,7 +467,7 @@ int color_space_transform(
         if (rgb2yuv)
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Y
                 tmp[k + red  ] =  0.333f * img[k + red] + 0.333f * img[k + green] + 0.333f * img[k + blue];
@@ -480,7 +480,7 @@ int color_space_transform(
         else
         {
         #pragma omp parallel for
-            for (unsigned k = 0; k < width * height; k++)
+            for (int k = 0; k < width * height; k++)
             {
                 //! Red   channel
                 tmp[k + red  ] = 1.0f * img[k + red] + 1.0f * img[k + green] + 0.666f * img[k + blue];
@@ -498,7 +498,7 @@ int color_space_transform(
     }
 
     #pragma omp parallel for
-        for (unsigned k = 0; k < width * height * chnls; k++)
+        for (int k = 0; k < width * height * chnls; k++)
             img[k] = tmp[k];
 
     return EXIT_SUCCESS;
