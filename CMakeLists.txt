@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(da3d)
+project(bm3d)
 
 # Find Matlab
 find_package(Matlab COMPONENTS MEX_COMPILER MX_LIBRARY REQUIRED)
@@ -38,3 +38,7 @@ endif ()
 
 matlab_add_mex(NAME bm3d ${SOURCE_FILES} LINK_TO ${FFTWF_LIBRARIES})
 target_include_directories(bm3d PUBLIC ${FFTW_INCLUDES})
+
+if (MEX_OUT_DIR)
+   add_custom_command(TARGET bm3d POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:bm3d> ${MEX_OUT_DIR})
+endif()
