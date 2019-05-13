@@ -108,7 +108,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
    vector<float> img_noisy, img_basic, img_denoised;
    unsigned width, height, chnls;
 
-   mxAssert(nrhs >= 2, "usage: input sigma [basic]\n\
+   if(nrhs < 2)
+      mexErrMsgIdAndTxt("bm3d:error", "usage: input sigma [basic]\n\
       [-tau_2d_hard{ dct,bior } (default: bior)]\n\
       [-useSD_hard]\n\
       [-tau_2d_wien{ dct,bior } (default: dct)]\n\
@@ -118,23 +119,21 @@ void mexFunction(int nlhs, mxArray *plhs[],
       [-nb_threads(default: 0, auto number)]\n\
       [-verbose]");
 
-   mxAssert(mxIsSingle(prhs[0]), "Input image must be of type single");
+   if (!mxIsSingle(prhs[0])) mexErrMsgIdAndTxt("bm3d:error", "Input image must be of type single");
+
    int ndim = mxGetNumberOfDimensions(prhs[0]);
    const mwSize* dims = mxGetDimensions(prhs[0]);
    width = dims[0];
    height = dims[1];
-   
-   if (ndim == 3)
-      chnls = dims[2];
-   else if (ndim > 3)
-   {
-      mexWarnMsgIdAndTxt("bm3d", "Expected data to be 2 or 3 dimensional"); return;
-   }
+   chnls = (ndim < 3) ? 1 : dims[2];
+
+   if (ndim > 3)
+      mexErrMsgIdAndTxt("bm3d:error", "Expected data to be 2 or 3 dimensional");
 
    img_noisy.resize(width * height * chnls);
    std::copy_n((float*) mxGetData(prhs[0]), width * height * chnls, img_noisy.begin());
 
-   mxAssert(mxIsNumeric(prhs[1]), "Sigma must be num");
+   if(!mxIsNumeric(prhs[1])) mexErrMsgIdAndTxt("bm3d:error", "Sigma must be num");
    float fSigma = mxGetScalar(prhs[1]); 
 
    //! Denoising
@@ -143,7 +142,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
       nb_threads, verbose)
       != EXIT_SUCCESS)
    {
-      mexWarnMsgIdAndTxt("bm3d", "BM3D failed"); return;
+      mexErrMsgIdAndTxt("bm3d:error", "BM3D failed");
    }
 
    if (nlhs >= 0)
