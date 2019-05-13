@@ -547,8 +547,12 @@ int estimate_sigma(
 ,   const unsigned chnls
 ,   const unsigned color_space
 ){
-    if (chnls == 1)
-        sigma_table[0] = sigma;
+    if (chnls < 3)
+    {
+       for (int i = 0; i<chnls; i++)
+          sigma_table[i] = sigma;
+
+    }
     else
     {
         if (color_space == YUV)

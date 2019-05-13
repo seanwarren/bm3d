@@ -126,8 +126,8 @@ int run_bm3d(
         img_denoised.resize(img_noisy.size());
 
     //! Transformation to YUV color space
-    if (color_space_transform(img_noisy, color_space, width, height, chnls, true)
-        != EXIT_SUCCESS) return EXIT_FAILURE;
+    //if (color_space_transform(img_noisy, color_space, width, height, chnls, true)
+    //    != EXIT_SUCCESS) return EXIT_FAILURE;
 
     //! Check if OpenMP is used or if number of cores of the computer is > 1
     int _nb_threads = nb_threads;
@@ -329,6 +329,7 @@ int run_bm3d(
                                                 width, height, chnls, 2 * nWien, false);
     }
 
+    /*
     //! Inverse color space transform to RGB
     if (color_space_transform(img_denoised, color_space, width, height, chnls, false)
         != EXIT_SUCCESS) return EXIT_FAILURE;
@@ -336,6 +337,7 @@ int run_bm3d(
         != EXIT_SUCCESS) return EXIT_FAILURE;
     if (color_space_transform(img_basic, color_space, width, height, chnls, false)
         != EXIT_SUCCESS) return EXIT_FAILURE;
+        */
 
     //! Free Memory
     if (tau_2D_hard == DCT || tau_2D_wien == DCT)
